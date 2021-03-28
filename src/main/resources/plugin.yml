@@ -1,0 +1,6 @@
+main: HigherRaid
+name: HigherRaid
+version: 1.0
+api-version: "1.16"
+author: Bjarne Roß
+description: Get higher raid independent of game difficulty!
