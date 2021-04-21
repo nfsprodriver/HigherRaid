@@ -11,6 +11,6 @@ class HigherRaid : JavaPlugin(){
         server.pluginManager.registerEvents(PillagerKilled(this, maxAmp, duration, logger), this)
         server.pluginManager.registerEvents(RaidTriggerEvent(this, logger), this)
         server.pluginManager.registerEvents(RaidWaveEvent(this, logger), this)
-        server.pluginManager.registerEvents(RaidFinishEvent(duration, logger), this)
+        server.pluginManager.registerEvents(RaidFinishEvent(duration, this, logger), this)
     }
 }

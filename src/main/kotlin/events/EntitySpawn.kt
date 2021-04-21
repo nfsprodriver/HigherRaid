@@ -15,8 +15,6 @@ class EntitySpawn(private val logger: Logger) : Listener {
             val entity: LivingEntity = event.entity as LivingEntity
             if (entity.category == EntityCategory.ILLAGER) {
                 if (entity.equipment?.helmet?.type == Material.WHITE_BANNER) {
-                    logger.info(entity.type.name)
-                    logger.info(entity.equipment?.armorContents.contentDeepToString())
                     entity.customName = "Captain"
                 }
             }

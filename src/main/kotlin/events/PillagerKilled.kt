@@ -1,14 +1,14 @@
 package events
 
+import org.bukkit.Chunk
 import org.bukkit.Location
+import org.bukkit.NamespacedKey
 import org.bukkit.World
-import org.bukkit.block.Block
 import org.bukkit.entity.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDeathEvent
-import org.bukkit.metadata.FixedMetadataValue
-import org.bukkit.metadata.MetadataValue
+import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
@@ -24,17 +24,18 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
         if (entity.category == EntityCategory.ILLAGER) { // && entity.customName == "Captain") {
             val player: Player? = entity.killer
             if (player != null) {
-                logger.info(player.name + " killed a raid captain.")
                 player.world.raids.forEach { raid ->
                     if (player.location.distance(raid.location) < 100) {
-                        val raidBlock: Block = raid.location.block
-                        if (raidBlock.hasMetadata("currentWave") && raidBlock.hasMetadata("wavesOverride")) {
-                            val currentWave: Int = raidBlock.getMetadata("currentWave").first().asInt()
-                            val wavesOverride: Int = raidBlock.getMetadata("wavesOverride").first().asInt()
+                        val raidChunk: Chunk = raid.location.chunk
+                        val currentWaveKey = NamespacedKey(plugin, "currentWave")
+                        val wavesOverrideKey = NamespacedKey(plugin, "wavesOverride")
+                        val currentWave: Int? = raidChunk.persistentDataContainer.get(currentWaveKey, PersistentDataType.INTEGER)
+                        val wavesOverride: Int? = raidChunk.persistentDataContainer.get(wavesOverrideKey, PersistentDataType.INTEGER)
+                        if (currentWave != null && wavesOverride != null) {
                             val raiders: List<Raider?> = raid.raiders
                             if (currentWave > raid.totalWaves && currentWave < wavesOverride && raiders.count() < 2) {
-                                val currentWaveMeta: MetadataValue = FixedMetadataValue(plugin, currentWave + 1)
-                                raidBlock.setMetadata("currentWave", currentWaveMeta)
+                            //if (raiders.count() < 2) {
+                                raidChunk.persistentDataContainer.set(currentWaveKey, PersistentDataType.INTEGER, currentWave + 1)
                                 spawnCustomWave(currentWave + 1, raid.location, logger)
                                 player.sendTitle("Wave " + (currentWave + 1).toString(), "", 20, 100, 20)
                             }
@@ -42,17 +43,14 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
                         return
                     }
                 }
-                var lastBadOmenValue = 0
-                if (player.hasMetadata("lastBadOmenValue")) {
-                    lastBadOmenValue = player.getMetadata("lastBadOmenValue").first().asInt()
-                    if (lastBadOmenValue < maxAmp) {
-                        lastBadOmenValue++
-                    }
+                val lastBadOmenValueKey = NamespacedKey(plugin, "lastBadOmenValue")
+                var lastBadOmenValue = player.persistentDataContainer.get(lastBadOmenValueKey, PersistentDataType.INTEGER) ?: 0
+                if (lastBadOmenValue < maxAmp) {
+                    lastBadOmenValue++
                 }
                 //val lastBadOmenMeta: MetadataValue = FixedMetadataValue(plugin, lastBadOmenValue)
-                val lastBadOmenMeta: MetadataValue = FixedMetadataValue(plugin, 19)
-                player.setMetadata("lastBadOmenValue", lastBadOmenMeta)
-                val badOmenEffect = PotionEffect(PotionEffectType.BAD_OMEN, duration, 19)
+                player.persistentDataContainer.set(lastBadOmenValueKey, PersistentDataType.INTEGER, lastBadOmenValue)
+                val badOmenEffect = PotionEffect(PotionEffectType.BAD_OMEN, duration, lastBadOmenValue)
                 player.addPotionEffect(badOmenEffect)
             }
         }
@@ -63,8 +61,9 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
         val randomVector = Vector.getRandom()
         randomVector.x -= 0.5;
         randomVector.z -= 0.5;
-        val spawnLoc: Location = loc.add(randomVector.multiply(50))
+        val spawnLoc: Location = loc.add(randomVector.multiply(50)).clone()
         val world: World = loc.world
+        spawnLoc.y = world.getHighestBlockYAt(spawnLoc).toDouble() + 1.0
 
         val illagerMap: Map<EntityType, Double> = mapOf(
             Pair(EntityType.PILLAGER, 0.7),
