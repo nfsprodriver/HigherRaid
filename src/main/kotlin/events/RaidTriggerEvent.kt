@@ -8,6 +8,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.raid.RaidTriggerEvent
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.Plugin
+import org.bukkit.potion.PotionEffectType
 import java.util.logging.Logger
 
 class RaidTriggerEvent(private val plugin: Plugin, private val logger: Logger) : Listener {
@@ -17,8 +18,9 @@ class RaidTriggerEvent(private val plugin: Plugin, private val logger: Logger) :
         val raid: Raid = event.raid
         val player: Player = event.player
         val lastBadOmenValueKey = NamespacedKey(plugin, "lastBadOmenValue")
-        val lastBadOmenValue: Int? = player.persistentDataContainer.get(lastBadOmenValueKey, PersistentDataType.INTEGER)
-        if (lastBadOmenValue != null) {
+        //val lastBadOmenValue: Int? = player.persistentDataContainer.get(lastBadOmenValueKey, PersistentDataType.INTEGER)
+        val lastBadOmenValue: Int? = player.getPotionEffect(PotionEffectType.BAD_OMEN)?.amplifier?.plus(1)
+        if (lastBadOmenValue != null && lastBadOmenValue > 0) {
             val currentWaveKey = NamespacedKey(plugin, "currentWave")
             val wavesOverrideKey = NamespacedKey(plugin, "wavesOverride")
             raid.location.chunk.persistentDataContainer.set(wavesOverrideKey, PersistentDataType.INTEGER, lastBadOmenValue)

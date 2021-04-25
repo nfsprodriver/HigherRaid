@@ -13,6 +13,7 @@ import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.util.Vector
+import org.jetbrains.annotations.Nullable
 import java.util.logging.Logger
 import kotlin.math.roundToInt
 
@@ -22,10 +23,7 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
     fun entityKill(event: EntityDeathEvent) {
         val entity: LivingEntity = event.entity
         val hasBannerKey = NamespacedKey(plugin, "hasBanner");
-        val player: Player? = entity.killer
-        if (player == null) {
-            return
-        }
+        val player: @Nullable Player = entity.killer ?: return
         if (entity is Raider) {
             player.world.raids.forEach { raid ->
                 if (player.location.distance(raid.location) < 100) {
