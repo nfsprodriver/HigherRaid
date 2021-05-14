@@ -27,7 +27,7 @@ class RaidFinishEvent(private val duration: Int, private val plugin: Plugin, pri
             val players: List<Player> = world.players
             players.forEach { player ->
                 if (player.location.distance(raid.location) < 100) {
-                    val heroEffect = PotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE, duration, totalWaves)
+                    val heroEffect = PotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE, duration, totalWaves - 1)
                     player.addPotionEffect(heroEffect)
                 }
             }

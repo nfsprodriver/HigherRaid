@@ -22,11 +22,9 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
     @EventHandler
     fun entityKill(event: EntityDeathEvent) {
         val entity: LivingEntity = event.entity
-        val hasBannerKey = NamespacedKey(plugin, "hasBanner");
-        val player: @Nullable Player = entity.killer ?: return
         if (entity is Raider) {
-            player.world.raids.forEach { raid ->
-                if (player.location.distance(raid.location) < 100) {
+            entity.world.raids.forEach { raid ->
+                if (entity.location.distance(raid.location) < 100) {
                     val raidChunk: Chunk = raid.location.chunk
                     val currentWaveKey = NamespacedKey(plugin, "currentWave")
                     val wavesOverrideKey = NamespacedKey(plugin, "wavesOverride")
@@ -35,23 +33,27 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
                     if (currentWave != null && wavesOverride != null) {
                         val raiders: List<Raider?> = raid.raiders
                         if (currentWave > raid.totalWaves && currentWave < wavesOverride && raiders.count() < 2) {
-                            //if (raiders.count() < 2) {
                             raidChunk.persistentDataContainer.set(currentWaveKey, PersistentDataType.INTEGER, currentWave + 1)
-                            spawnCustomWave(currentWave + 1, raid.location, logger)
-                            player.sendTitle("Wave " + (currentWave + 1).toString(), "", 20, 100, 20)
+                            spawnCustomWave(currentWave, raid.location, logger)
+                            entity.world.players.forEach { player ->
+                                if (player.location.distance(raid.location) < 100) {
+                                    player.sendTitle("Wave " + (currentWave + 1), "", 20, 100, 20)
+                                }
+                            }
                         }
                     }
                     return
                 }
             }
         }
+        val hasBannerKey = NamespacedKey(plugin, "hasBanner")
+        val player: @Nullable Player = entity.killer ?: return
         if (entity.persistentDataContainer.has(hasBannerKey, PersistentDataType.SHORT)) {
             val lastBadOmenValueKey = NamespacedKey(plugin, "lastBadOmenValue")
             var lastBadOmenValue = player.persistentDataContainer.get(lastBadOmenValueKey, PersistentDataType.INTEGER) ?: 0
             if (lastBadOmenValue < maxAmp) {
                 lastBadOmenValue++
             }
-            //val lastBadOmenMeta: MetadataValue = FixedMetadataValue(plugin, lastBadOmenValue)
             player.persistentDataContainer.set(lastBadOmenValueKey, PersistentDataType.INTEGER, lastBadOmenValue)
             val badOmenEffect = PotionEffect(PotionEffectType.BAD_OMEN, duration, lastBadOmenValue - 1)
             player.addPotionEffect(badOmenEffect)
