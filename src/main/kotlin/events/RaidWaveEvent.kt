@@ -7,9 +7,8 @@ import org.bukkit.event.Listener
 import org.bukkit.event.raid.RaidSpawnWaveEvent
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.Plugin
-import java.util.logging.Logger
 
-class RaidWaveEvent(private val plugin: Plugin, private val logger: Logger) : Listener {
+class RaidWaveEvent(private val plugin: Plugin) : Listener {
 
     @EventHandler
     fun raidWave(event: RaidSpawnWaveEvent) {

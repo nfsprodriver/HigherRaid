@@ -3,7 +3,6 @@ package events
 import org.bukkit.Chunk
 import org.bukkit.NamespacedKey
 import org.bukkit.Raid
-import org.bukkit.block.Block
 import org.bukkit.entity.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -12,9 +11,8 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
-import java.util.logging.Logger
 
-class RaidFinishEvent(private val duration: Int, private val plugin: Plugin, private val logger: Logger) : Listener {
+class RaidFinishEvent(private val duration: Int, private val plugin: Plugin) : Listener {
 
     @EventHandler
     fun raidWave(event: RaidFinishEvent) {

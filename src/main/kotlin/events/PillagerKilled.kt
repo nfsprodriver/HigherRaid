@@ -14,10 +14,9 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.util.Vector
 import org.jetbrains.annotations.Nullable
-import java.util.logging.Logger
 import kotlin.math.roundToInt
 
-class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, private val duration: Int, private val logger: Logger) : Listener {
+class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, private val duration: Int) : Listener {
 
     @EventHandler
     fun entityKill(event: EntityDeathEvent) {
@@ -34,7 +33,7 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
                         val raiders: List<Raider?> = raid.raiders
                         if (currentWave > raid.totalWaves && currentWave < wavesOverride && raiders.count() < 2) {
                             raidChunk.persistentDataContainer.set(currentWaveKey, PersistentDataType.INTEGER, currentWave + 1)
-                            spawnCustomWave(currentWave, raid.location, logger)
+                            spawnCustomWave(currentWave, raid.location)
                             entity.world.players.forEach { player ->
                                 if (player.location.distance(raid.location) < 100) {
                                     player.sendTitle("Wave " + (currentWave + 1), "", 20, 100, 20)
@@ -60,7 +59,7 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
         }
     }
 
-    private fun spawnCustomWave(currentWave: Int, loc: Location, logger: Logger) {
+    private fun spawnCustomWave(currentWave: Int, loc: Location) {
 
         val randomVector = Vector.getRandom()
         randomVector.x -= 0.5
@@ -79,7 +78,7 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
         )
         illagerMap.forEach { illagerPair->
             val count: Int = (illagerPair.value * currentWave - 0.5).roundToInt()
-            logger.info("Spawning " + count + " of " + illagerPair.key.name + " at " + spawnLoc.toString())
+            plugin.logger.info("Spawning " + count + " of " + illagerPair.key.name + " at " + spawnLoc.toString())
             for (i in 1..count) {
                 world.spawnEntity(spawnLoc, illagerPair.key) as Raider
             }

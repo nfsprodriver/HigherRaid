@@ -9,9 +9,8 @@ import org.bukkit.event.raid.RaidTriggerEvent
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffectType
-import java.util.logging.Logger
 
-class RaidTriggerEvent(private val plugin: Plugin, private val logger: Logger) : Listener {
+class RaidTriggerEvent(private val plugin: Plugin) : Listener {
 
     @EventHandler
     fun raid(event: RaidTriggerEvent) {
