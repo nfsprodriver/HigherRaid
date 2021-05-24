@@ -14,7 +14,11 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.util.Vector
 import org.jetbrains.annotations.Nullable
+import java.util.*
+import kotlin.math.pow
 import kotlin.math.roundToInt
+import kotlin.math.sign
+import kotlin.math.sqrt
 
 class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, private val duration: Int) : Listener {
 
@@ -78,16 +82,19 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
     }
 
     private fun randomLoc(loc: Location):Location {
-        val randomVector = Vector.getRandom()
-        randomVector.x -= 0.5
-        randomVector.z -= 0.5
-        val spawnLoc: Location = loc.clone().add(randomVector.multiply(200))
-        spawnLoc.y = loc.world.getHighestBlockYAt(spawnLoc).toDouble()
+        val radius = 100.0
+        var x: Double = (Math.random() - 0.5) * radius * 2
+        var z: Double = sqrt(radius.pow(2) - x.pow(2)) * (Math.random() - 0.5).sign
+        var spawnLoc: Location = loc.clone().add(x, 0.0, z)
+        spawnLoc.y = spawnLoc.world.getHighestBlockYAt(spawnLoc).toDouble()
         while (spawnLoc.block.isLiquid) {
-            randomLoc(loc)
+            x = (Math.random() - 0.5) * radius * 2
+            z = sqrt(radius.pow(2) - x.pow(2)) * (Math.random() - 0.5).sign
+            spawnLoc = loc.clone().add(x, 0.0, z)
+            spawnLoc.y = spawnLoc.world.getHighestBlockYAt(spawnLoc).toDouble()
         }
 
-        spawnLoc.y.plus(1.0)
+        spawnLoc.y += 1.0
 
         return spawnLoc
     }
