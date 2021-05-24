@@ -23,7 +23,7 @@ class EntitySpawn(private val plugin: Plugin, private val addProb: Double) : Lis
             val entity: LivingEntity = event.entity as LivingEntity
             if (entity is Pillager || entity.type == EntityType.PILLAGER) { //same
                 val random: Double = Math.random()
-                val captain: Boolean = random < plugin.config.getDouble("addProb")
+                val captain: Boolean = random < addProb
                 if (captain && entity.equipment?.helmet?.type != Material.WHITE_BANNER) {
                     entity.equipment?.helmet = getOminousBanner(1)
                     entity.equipment?.helmetDropChance = 1.0F

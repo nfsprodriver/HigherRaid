@@ -21,7 +21,7 @@ class RaidWaveEvent(private val plugin: Plugin) : Listener {
             val world = raid.location.world
             val players: List<Player> = world.players
             players.forEach { player ->
-                if (player.location.distance(raid.location) < 100) {
+                if (player.location.distance(raid.location) < 200) {
                     player.sendTitle("Wave " + (currentWave + 1).toString(), "", 20, 100, 20)
                 }
             }

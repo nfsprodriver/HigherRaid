@@ -1,2 +1,2 @@
 # HigherRaid
-Create a Lore using a Button!
+Get higher raid independent of game difficulty!

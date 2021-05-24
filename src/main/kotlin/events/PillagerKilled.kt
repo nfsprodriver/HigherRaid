@@ -23,7 +23,7 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
         val entity: LivingEntity = event.entity
         if (entity is Raider) {
             entity.world.raids.forEach { raid ->
-                if (entity.location.distance(raid.location) < 100) {
+                if (entity.location.distance(raid.location) < 200) {
                     val raidChunk: Chunk = raid.location.chunk
                     val currentWaveKey = NamespacedKey(plugin, "currentWave")
                     val wavesOverrideKey = NamespacedKey(plugin, "wavesOverride")
@@ -35,7 +35,7 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
                             raidChunk.persistentDataContainer.set(currentWaveKey, PersistentDataType.INTEGER, currentWave + 1)
                             spawnCustomWave(currentWave, raid.location)
                             entity.world.players.forEach { player ->
-                                if (player.location.distance(raid.location) < 100) {
+                                if (player.location.distance(raid.location) < 200) {
                                     player.sendTitle("Wave " + (currentWave + 1), "", 20, 100, 20)
                                 }
                             }
@@ -60,14 +60,6 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
     }
 
     private fun spawnCustomWave(currentWave: Int, loc: Location) {
-
-        val randomVector = Vector.getRandom()
-        randomVector.x -= 0.5
-        randomVector.z -= 0.5
-        val spawnLoc: Location = loc.clone().add(randomVector.multiply(200))
-        val world: World = loc.world
-        spawnLoc.y = world.getHighestBlockYAt(spawnLoc).toDouble() + 1.0
-
         val illagerMap: Map<EntityType, Double> = mapOf(
             Pair(EntityType.PILLAGER, 0.4),
             Pair(EntityType.VINDICATOR, 0.35),
@@ -78,10 +70,25 @@ class PillagerKilled(private val plugin: Plugin, private val maxAmp: Int, privat
         )
         illagerMap.forEach { illagerPair->
             val count: Int = (illagerPair.value * currentWave - 0.5).roundToInt()
-            plugin.logger.info("Spawning " + count + " of " + illagerPair.key.name + " at " + spawnLoc.toString())
             for (i in 1..count) {
-                world.spawnEntity(spawnLoc, illagerPair.key) as Raider
+                val spawnLoc: Location = randomLoc(loc)
+                spawnLoc.world.spawnEntity(spawnLoc, illagerPair.key) as Raider
             }
         }
+    }
+
+    private fun randomLoc(loc: Location):Location {
+        val randomVector = Vector.getRandom()
+        randomVector.x -= 0.5
+        randomVector.z -= 0.5
+        val spawnLoc: Location = loc.clone().add(randomVector.multiply(200))
+        spawnLoc.y = loc.world.getHighestBlockYAt(spawnLoc).toDouble()
+        while (spawnLoc.block.isLiquid) {
+            randomLoc(loc)
+        }
+
+        spawnLoc.y.plus(1.0)
+
+        return spawnLoc
     }
 }
